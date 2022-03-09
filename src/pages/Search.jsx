@@ -62,13 +62,14 @@ class Search extends React.Component {
           </button>
         </form>
         {
-          artistResult && albuns.length === 0
+          albuns.length <= 0
             ? <p>Nenhum álbum foi encontrado</p>
             : (
               <div>
                 <p>
                   Resultado de álbuns de:
-                  {` ${artistResult}`}
+                  {' '}
+                  { `${artistResult}` }
                 </p>
                 <div>
                   {

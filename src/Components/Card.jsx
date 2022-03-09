@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 class Card extends React.Component {
   render() {
     const { name, id } = this.props;
+    console.log(name);
+    console.log(id);
     return (
       <div>
         <Link
@@ -13,14 +15,13 @@ class Card extends React.Component {
         >
           { name }
         </Link>
-        <p>{ id }</p>
       </div>
     );
   }
 }
 
 Card.propTypes = {
-  id: propTypes.string.isRequired,
+  id: propTypes.number.isRequired,
   name: propTypes.string.isRequired,
 };
 
