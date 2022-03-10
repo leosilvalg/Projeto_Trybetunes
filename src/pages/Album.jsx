@@ -25,10 +25,12 @@ class Album extends React.Component {
     const { match: { params: { id } } } = this.props;
     this.setState({ loading: true });
     const musicResults = await getMusics(id);
+    const songs = musicResults.filter((track) => track.trackId); // Adicionei esse filtro, do contrario, era renderizado um player a mais, relacionado ao primeiro objeto do array
+    console.log(musicResults);
     this.setState({
       loading: false,
       musics: musicResults[0],
-      musicList: musicResults,
+      musicList: songs,
     });
   }
 
@@ -37,20 +39,26 @@ class Album extends React.Component {
     console.log(musics);
 
     return (
-      <div data-testid="page-album">
-        <Header />
+      <>
+        <div data-testid="page-album">
+          <Header />
+          <h1 data-testid="artist-name">{musics.artistName}</h1>
+          <h2 data-testid="album-name">{musics.collectionName}</h2>
+        </div>
         {
           loading
             ? <Loading />
             : (
-              <div>
-                <h1 data-testid="artist-name">{musics.artistName}</h1>
-                <h2 data-testid="album-name">{musics.collectionName}</h2>
-                <MusicCard musics={ musicList } />
-              </div>
+              musicList.map((music) => (
+                <MusicCard
+                  key={ music.trackId }
+                  trackName={ music.trackName }
+                  previewUrl={ music.previewUrl }
+                  trackId={ music.trackId }
+                />))
             )
         }
-      </div>
+      </>
     );
   }
 }
