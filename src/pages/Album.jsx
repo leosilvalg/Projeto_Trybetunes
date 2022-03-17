@@ -5,6 +5,8 @@ import Loading from '../Components/Loading';
 import getMusics from '../services/musicsAPI';
 import MusicCard from '../Components/musicCard';
 
+import { getFavoriteSongs } from '../services/favoriteSongsAPI';
+
 class Album extends React.Component {
   constructor() {
     super();
@@ -13,12 +15,15 @@ class Album extends React.Component {
       loading: false,
       musics: [],
       musicList: [],
+      fav: [],
     };
     this.getMusic = this.getMusic.bind(this);
+    this.getFav = this.getFav.bind(this);
   }
 
   componentDidMount() {
     this.getMusic();
+    this.getFav();
   }
 
   async getMusic() {
@@ -34,8 +39,20 @@ class Album extends React.Component {
     });
   }
 
+  getFav() {
+    this.setState({
+      loading: true,
+    }, async () => {
+      const data = await getFavoriteSongs();
+      this.setState({
+        loading: false,
+        fav: [...await data],
+      });
+    });
+  }
+
   render() {
-    const { loading, musics, musicList } = this.state;
+    const { loading, musics, musicList, fav } = this.state;
     console.log(musics);
 
     return (
@@ -55,6 +72,8 @@ class Album extends React.Component {
                   trackName={ music.trackName }
                   previewUrl={ music.previewUrl }
                   trackId={ music.trackId }
+                  getFavotite={ fav.some((song) => song.trackId === music.trackId) }
+                  music={ music }
                 />))
             )
         }
