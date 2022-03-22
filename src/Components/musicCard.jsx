@@ -1,33 +1,32 @@
 import React from 'react';
 import propTypes from 'prop-types';
 import Loading from './Loading';
-import { getFavoriteSongs, addSong, removeSong } from '../services/favoriteSongsAPI';
+import { addSong } from '../services/favoriteSongsAPI';
 
 class MusicCard extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor() {
+    super();
 
     this.state = {
       loading: false,
+      favorite: false,
+      check: false,
     };
-
-    this.inputChange = this.inputChange.bind(this);
   }
 
-  async inputChange(tracks) {
-    this.setState({ loading: true });
-    const favoriteSongs = await getFavoriteSongs();
-    if (favoriteSongs.some((track) => track.trackId === tracks.trackId)) {
-      await removeSong(tracks);
-    } await addSong(tracks);
-    this.setState({
-      loading: false,
-    });
+  handleFavorite = async () => {
+    const { trackId } = this.props;
+    this.setState({ check: true });
+
+    const data =  await addSong(trackId);
+    this.setState({ check: false, favorite: true });
+
+    return data;
   }
 
   render() {
-    const { trackName, previewUrl, trackId, getFavotite } = this.props;
-    const { loading } = this.state;
+    const { trackName, previewUrl, trackId } = this.props;
+    const { check, favorite } = this.state;
     return (
       <div>
         <p>{ trackName }</p>
@@ -41,7 +40,7 @@ class MusicCard extends React.Component {
           <code>audio</code>
         </audio>
         {
-          loading
+          check
             ? <Loading />
             : (
               <label htmlFor="favoriteMusic">
@@ -50,8 +49,8 @@ class MusicCard extends React.Component {
                   data-testid={ `checkbox-music-${trackId}` }
                   name="favoriteMusic"
                   type="checkbox"
-                  checked={ getFavotite }
-                  onChange={ () => this.inputChange(this.props) }
+                  checked={ favorite }
+                  onChange={ () => { this.handleFavorite() } }
                 />
               </label>
             )
