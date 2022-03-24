@@ -14,24 +14,22 @@ class Album extends React.Component {
       loading: true,
       musics: [],
       musicList: [],
+      favSong: [],
     };
     this.getMusic = this.getMusic.bind(this);
+    this.favSong = this.favSong.bind(this);
   }
 
   componentDidMount() {
     this.getMusic();
-    this.handleFavorites();
+    this.favSong();
   }
 
-  handleFavorites = async () => {
-    await getFavoriteSongs();
-  }
 
   async getMusic() {
     const { match: { params: { id } } } = this.props;
     const musicResults = await getMusics(id);
     const songs = musicResults.filter((track) => track.trackId); // Adicionei esse filtro, do contrario, era renderizado um player a mais, relacionado ao primeiro objeto do array
-    console.log(musicResults);
     this.setState({
       loading: false,
       musics: musicResults[0],
@@ -39,10 +37,18 @@ class Album extends React.Component {
     });
   }
 
-  render() {
-    const { loading, musics, musicList } = this.state;
-    console.log(musics);
+  async favSong() {
+    const favorites = await getFavoriteSongs();
+    console.log(favorites);
+    this.setState({
+      loading: true,
+      favSong: favorites,
+    });
+    this.setState({ loading: false });
+  }
 
+  render() {
+    const { loading, musics, musicList, favSong } = this.state;
     return (
       <>
         <div data-testid="page-album">
@@ -61,6 +67,7 @@ class Album extends React.Component {
                   previewUrl={ music.previewUrl }
                   trackId={ music.trackId }
                   music={ music }
+                  favSong={ favSong }
                 />))
             )
         }

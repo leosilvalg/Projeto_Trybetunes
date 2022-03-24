@@ -1,8 +1,7 @@
 import React from 'react';
 import propTypes from 'prop-types';
 import Loading from './Loading';
-import { addSong, getFavoriteSongs } from '../services/favoriteSongsAPI';
-import getMusics from '../services/musicsAPI';
+import { addSong, removeSong } from '../services/favoriteSongsAPI';
 
 class MusicCard extends React.Component {
   constructor() {
@@ -11,51 +10,46 @@ class MusicCard extends React.Component {
     this.state = {
       loading: false,
       favorite: false,
-      check: false,
       music: [],
       fav: [],
     };
   }
 
   componentDidMount() {
-    this.request();
-    this.getFavs();
-  }
-
-  request = async () => {
-    const { trackId } = this.props;
-    const data = await getMusics(trackId);
-    this.setState({ music: data });
+    const { music: { trackId } } = this.props;
+    const favoriteSong = this.favorites(trackId);
+    if (favoriteSong) {
+      this.setState({ favorite: true });
+    }
   }
 
   getFavs = async () => {
-    const data = await getFavoriteSongs();
-    this.setState({ 
-      check: true,
-      fav: data,
-    });
-
-    const { music, fav } = this.state;
-    const isFavorite = fav.some((item) => item.trackId === music[0].trackId);
-    this.setState({
-      favorite: isFavorite,
-      check: false,
-    });
+    const { music } = this.state;
+    this.setState((prevState) => ({
+      loading: true,
+      favorite: !prevState.favorite,
+    }), async () => {
+      const { favorite } = this.state;
+      if (favorite) {
+        await addSong(music);
+      } else {
+        await removeSong(music);
+      }
+      this.setState({
+        loading: false,
+      });
+    })
   }
 
-  handleFavorite = async () => {
-    const { music } = this.state;
-    this.setState({ check: true });
-
-    const data =  await addSong(music[0]);
-    this.setState({ check: false, favorite: true });
-
-    return data;
+  favorites = (teste) => {
+    const { favSong } = this.props;
+    const testando = favSong.some(fav => fav.trackId === teste);
+    return testando;
   }
 
   render() {
     const { trackName, previewUrl, trackId } = this.props;
-    const { check, favorite } = this.state;
+    const { loading, favorite } = this.state;
     return (
       <div>
         <p>{ trackName }</p>
@@ -69,7 +63,7 @@ class MusicCard extends React.Component {
           <code>audio</code>
         </audio>
         {
-          check
+          loading
             ? <Loading />
             : (
               <label htmlFor="favoriteMusic">
@@ -79,7 +73,7 @@ class MusicCard extends React.Component {
                   name="favoriteMusic"
                   type="checkbox"
                   checked={ favorite }
-                  onChange={ () => { this.handleFavorite() } }
+                  onChange={ this.getFavs }
                 />
               </label>
             )
